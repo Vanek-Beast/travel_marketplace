@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -21,56 +20,49 @@ public class BookingService {
     private final TripRepository tripRepository;
     private final UserService userService;
     private final PaymentService paymentService;
+    private final TripService tripService;
 
     @Autowired
     public BookingService(BookingRepository bookingRepository,
                           TripRepository tripRepository,
                           UserService userService,
-                          PaymentService paymentService) {
+                          PaymentService paymentService, TripService tripService) {
         this.bookingRepository = bookingRepository;
         this.tripRepository = tripRepository;
         this.userService = userService;
         this.paymentService = paymentService;
+        this.tripService = tripService;
     }
 
     // Создание бронирования и соотвествующего платежа
     @Transactional
     public Booking createBooking(BookingDTO bookingDTO) {
-
-        if (bookingDTO.getTripIds() == null || bookingDTO.getTripIds().isEmpty()) {
-            throw new IllegalArgumentException("Trip list cannot be empty.");
-        }
-
-        List<Trip> trips = tripRepository.findAllById(bookingDTO.getTripIds());
-        BigDecimal amount = BigDecimal.ZERO;
-        // Проверяем доступные места для каждой поездки
-        for (Trip trip : trips) {
-            int bookedSeats = bookingRepository.countByTripsContainsAndStatus(trip, Booking.BookingStatus.CONFIRMED);
-            amount = amount.add(trip.getPrice());
-            if (bookedSeats >= trip.getSeatsAvailable()) {
+        Trip trip = tripRepository.findById(bookingDTO.getTripId())
+                .orElseThrow(() -> new EntityNotFoundException("Trip not found with id=%s"
+                        .formatted(bookingDTO.getTripId())));
+        // Проверяем доступные места для поездки
+        if (!tripService.hasAvailableSeats(trip)) {
                 throw new IllegalStateException("Not enough seats available for trip with id=%S".formatted(trip.getId()));
             }
-        }
         Booking booking = Booking.builder()
                 .user(userService.getUserById(bookingDTO.getUserId()))
-                .trips(trips)
+                .trip(trip)
                 .build();
         bookingRepository.save(booking);
-        paymentService.createPayment(booking, amount);  // создаем платеж при оформлении брони
+        paymentService.createPayment(booking, trip.getPrice());  // создаем платеж при оформлении брони
         return booking;
     }
 
     // Отмена брони
     @Transactional
     public void cancelBooking(Long id) {
-        Booking booking = bookingRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Booking not found with id=%s".formatted(id)));
+        Booking booking = getBookingById(id);
 
         if (booking.getStatus() == Booking.BookingStatus.CANCELLED) {
             throw new IllegalStateException("Booking is already cancelled");
         }
 
-        Payment payment = paymentService.findByBookingId(id);
+        Payment payment = paymentService.getByBookingId(id);
 
         if (payment != null) {
             switch (payment.getStatus()) {

@@ -11,4 +11,5 @@ import java.util.Optional;
 public interface TripRepository extends JpaRepository<Trip, Long> {
     Optional<List<Trip>> findByRouteId(Long routeId);
     Optional<List<Trip>> findByTransportTypeId(Long transportTypeId);
+    Optional<List<Trip>> findByTransportTypeIdAndRouteId(Long transportTypeId, Long routeId);
 }

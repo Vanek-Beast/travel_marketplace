@@ -1,10 +1,10 @@
 package com.example.marketplace.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Entity
 @Table(name = "bookings")
@@ -23,18 +23,15 @@ public class Booking {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @ManyToMany
-    @JoinTable(
-            name = "booking_trips",
-            joinColumns = @JoinColumn(name = "booking_id"),
-            inverseJoinColumns = @JoinColumn(name = "trip_id")
-    )
-    @Column(nullable = false)
-    private List<Trip> trips;
+    @ManyToOne
+    @JoinColumn(name = "trip_id", nullable = false)
+    private Trip trip;
 
+    @NotNull
     @Column(nullable = false)
     private LocalDateTime bookingTime;
 
+    @NotNull
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private BookingStatus status;

@@ -42,9 +42,7 @@ public class UserService {
     // Обновление пользователя
     @Transactional
     public User updateUser(Long id, User updatedUser) {
-        var user = userRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("User not found by id=%s"
-                        .formatted(id)));
+        var user = getUserById(id);
         user.setName(updatedUser.getName());
         user.setSurname(updatedUser.getSurname());
         user.setEmail(updatedUser.getEmail());
