@@ -3,14 +3,16 @@ package com.example.marketplace.controller;
 import com.example.marketplace.dto.BookingDTO;
 import com.example.marketplace.model.Booking;
 import com.example.marketplace.service.BookingService;
-import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Validated
 @RestController
 @RequestMapping("/api/bookings")
 public class BookingController {
@@ -24,31 +26,26 @@ public class BookingController {
 
     // Создание бронирования
     @PostMapping
-    public ResponseEntity<Booking> createBooking(@RequestBody BookingDTO bookingDTO) {
+    public ResponseEntity<Booking> createBooking(@Valid @RequestBody BookingDTO bookingDTO) {
         return ResponseEntity.ok(bookingService.createBooking(bookingDTO));
     }
 
     // Отмена бронирования
     @PatchMapping("/{bookingId}/cancel")
-    public ResponseEntity<String> cancelBooking(@PathVariable Long bookingId) {
+    public ResponseEntity<String> cancelBooking(@PathVariable @Min(1) Long bookingId) {
         bookingService.cancelBooking(bookingId);
         return ResponseEntity.ok("Booking cancelled successfully");
     }
 
     // Получение всех броней пользователя
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<Booking>> getUserBookings(@PathVariable Long userId) {
+    public ResponseEntity<List<Booking>> getUserBookings(@PathVariable @Min(1) Long userId) {
         return ResponseEntity.ok(bookingService.getUserBookings(userId));
     }
 
     // Получение информации о конкретной брони
     @GetMapping("/{bookingId}")
-    public ResponseEntity<Booking> getBookingById(@PathVariable Long bookingId) {
+    public ResponseEntity<Booking> getBookingById(@PathVariable @Min(1) Long bookingId) {
         return ResponseEntity.ok(bookingService.getBookingById(bookingId));
-    }
-    // Глобальный обработчик ошибок
-    @ExceptionHandler({EntityNotFoundException.class, IllegalStateException.class, IllegalArgumentException.class})
-    public ResponseEntity<String> handleException(RuntimeException ex) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
     }
 }

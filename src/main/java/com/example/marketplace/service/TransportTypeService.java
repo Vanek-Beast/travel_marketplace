@@ -2,7 +2,6 @@ package com.example.marketplace.service;
 
 import com.example.marketplace.model.TransportType;
 import com.example.marketplace.repository.TransportTypeRepository;
-import com.example.marketplace.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,9 +43,7 @@ public class TransportTypeService {
     // Обновление типа транспорта
     @Transactional
     public TransportType updateTransportType(Long id, TransportType updatedTransportType) {
-        var transportType = transportTypeRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Transport type not found by id=%s"
-                        .formatted(id)));
+        var transportType = getTransportTypeById(id);
         transportType.setName(updatedTransportType.getName());
         return transportType;
     }

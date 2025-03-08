@@ -1,6 +1,8 @@
 package com.example.marketplace.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -19,13 +21,17 @@ public class Payment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotNull
     @OneToOne
     @JoinColumn(name = "booking_id", nullable = false, unique = true)
     private Booking booking;
 
+    @NotNull(message = "Стоимость обязательна")
+    @Positive(message = "Стоимость должна быть положительной")
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal amount;
 
+    @NotNull
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Payment.PaymentStatus status;
@@ -34,6 +40,7 @@ public class Payment {
         PENDING, PAID, FAILED, REFUNDED
     }
 
+    @NotNull
     @Enumerated(EnumType.STRING)
     @Column(name = "payment_method")
     private PaymentMethod paymentMethod;
@@ -42,6 +49,7 @@ public class Payment {
         CARD, SBP, SBER_PAY
     }
 
+    @NotNull
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 

@@ -31,7 +31,7 @@ public class PaymentService {
 
     }
     // Получение платежа по id
-    public Payment findPaymentById(Long id) {
+    public Payment getPaymentById(Long id) {
         return paymentRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Payment not found with id=%s".formatted(id)));
     }
@@ -39,8 +39,7 @@ public class PaymentService {
     // Обработка платежа
     @Transactional
     public Payment processPayment(Long id, PaymentDTO paymentDTO) {
-        Payment payment = paymentRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Payment not found with id=%s".formatted(id)));
+        Payment payment = getPaymentById(id);
 
         if (payment.getStatus() == Payment.PaymentStatus.PAID) {
             throw new IllegalStateException("Payment has already paid");
@@ -70,7 +69,7 @@ public class PaymentService {
     }
 
     // Получение платежа по брони
-    public Payment findByBookingId(Long id) {
+    public Payment getByBookingId(Long id) {
         return paymentRepository.findByBookingId(id)
                 .orElseThrow(() -> new EntityNotFoundException("Payment not found with booking_id=%s".formatted(id)));
     }
@@ -78,8 +77,7 @@ public class PaymentService {
     // Возврат платежа
     @Transactional
     public void refundPayment(Long paymentId) {
-        Payment payment = paymentRepository.findById(paymentId)
-                .orElseThrow(() -> new IllegalArgumentException("Payment not found with id=%s".formatted(paymentId)));
+        Payment payment = getPaymentById(paymentId);
 
         // Проверяем, можно ли выполнить возврат
         if (payment.getStatus() != Payment.PaymentStatus.PAID) {

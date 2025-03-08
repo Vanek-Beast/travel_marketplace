@@ -2,14 +2,17 @@ package com.example.marketplace.controller;
 
 import com.example.marketplace.model.Route;
 import com.example.marketplace.service.RouteService;
-import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Validated
 @RestController
 @RequestMapping("/api/routes")
 public class RouteController {
@@ -29,31 +32,26 @@ public class RouteController {
 
     // Получение маршрута по id
     @GetMapping("/{id}")
-    public ResponseEntity<Route> getRouteById(@PathVariable Long id) {
+    public ResponseEntity<Route> getRouteById(@PathVariable @Min(1) Long id) {
         return ResponseEntity.ok(routeService.getRouteById(id));
     }
 
     // Создание маршрута
     @PostMapping
-    public ResponseEntity<Route> createRoute(@RequestBody Route route) {
+    public ResponseEntity<Route> createRoute(@Valid @RequestBody Route route) {
         return ResponseEntity.status(HttpStatus.CREATED).body(routeService.createRoute(route));
     }
 
     // Обновление маршрута
     @PutMapping("/{id}")
-    public ResponseEntity<Route> updateRoute(@PathVariable Long id, @RequestBody Route route) {
+    public ResponseEntity<Route> updateRoute(@PathVariable @Min(1) Long id, @Valid @RequestBody Route route) {
         return ResponseEntity.ok(routeService.updateRoute(id, route));
     }
 
     // Удаление маршрута
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteRoute(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteRoute(@PathVariable @Min(1) Long id) {
         routeService.deleteRoute(id);
         return ResponseEntity.noContent().build();
-    }
-    // Глобальный обработчик ошибок
-    @ExceptionHandler({EntityNotFoundException.class, IllegalStateException.class, IllegalArgumentException.class})
-    public ResponseEntity<String> handleException(RuntimeException ex) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
     }
 }

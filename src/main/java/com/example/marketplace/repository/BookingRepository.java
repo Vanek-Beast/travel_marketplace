@@ -11,5 +11,5 @@ import java.util.Optional;
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Long> {
     Optional<List<Booking>> findAllByUserId(Long userId);
-    int countByTripsContainsAndStatus(Trip trip, Booking.BookingStatus status);
+    int countByTripAndStatus(Trip trip, Booking.BookingStatus status);
 }

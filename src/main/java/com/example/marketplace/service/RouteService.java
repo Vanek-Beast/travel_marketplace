@@ -39,9 +39,7 @@ public class RouteService {
     // Обновление маршрута
     @Transactional
     public Route updateRoute(Long id, Route updatedRoute) {
-         var route = routeRepository.findById(id)
-                 .orElseThrow(() -> new EntityNotFoundException("Route not found by id=%s"
-                         .formatted(id)));
+         var route = getRouteById(id);
          route.setOrigin(updatedRoute.getOrigin());
          route.setDestination(updatedRoute.getDestination());
          return route;
